@@ -11,7 +11,8 @@ defmodule Supermarket.Checkout do
   ## Returns
 
   * `{:ok, total} - total price as a `Money` struct
-  * `{:error, reason} - error if total cannot be calculated, e.g. invalid product code is present
+  * `{:error, {:unknown_product_code, product_code}} - error if total cannot be calculated due to unknown product code.
+    The first unknown code is returned.
 
   """
   def cashier(product_codes) when is_list(product_codes) do
