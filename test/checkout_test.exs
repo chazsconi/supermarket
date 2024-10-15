@@ -38,7 +38,7 @@ defmodule Supermarket.CheckoutTest do
     end
 
     test "Unknown product_code" do
-      assert Checkout.cashier(~w(AP1 XX BA1)) == {:error, {:unknown_product_code, "XX"}}
+      assert Checkout.cashier(~w(AP1 YY BA1 XX)) == {:error, {:unknown_product_codes, ~w(XX YY)}}
     end
   end
 end
