@@ -1,10 +1,10 @@
 import Config
 
-alias Supermarket.Product
+alias Supermarket.Products.Product
 alias Supermarket.PriceCondition.{Bogof, BulkDiscountPrice, BulkDiscountFraction}
 
 # Config is in runtime.exs so we can use structs
-config :supermarket, Supermarket.Product,
+config :supermarket, Supermarket.Products,
   products:
     [
       %Product{

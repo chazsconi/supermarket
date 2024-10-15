@@ -1,7 +1,8 @@
 defmodule Supermarket.Checkout do
   @moduledoc "Implements the checkout functionality of the supermarket"
   alias Supermarket.PriceCondition
-  alias Supermarket.Product
+  alias Supermarket.Products
+  alias Supermarket.Products.Product
 
   @doc """
   Calculates the total price of a basket of product codes
@@ -44,7 +45,7 @@ defmodule Supermarket.Checkout do
     do: {:error, {:unknown_product_codes, Enum.sort(not_found)}}
 
   defp fetch_products([{code, frequency} | rest], found, not_found) do
-    case Product.fetch(code) do
+    case Products.fetch(code) do
       {:ok, %Product{} = product} ->
         fetch_products(rest, [{product, frequency} | found], not_found)
 
