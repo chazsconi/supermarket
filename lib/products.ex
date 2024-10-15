@@ -1,9 +1,24 @@
 defmodule Supermarket.Products do
-  @moduledoc "Functions for products"
+  @moduledoc """
+  Functions for storing product an price configuration.
+  """
+  alias __MODULE__.Product
+
+  @doc "Creates an empty product store"
+  def empty, do: %{}
+
+  @doc """
+  Add a product to the products
+  """
+  def add(products, %Product{code: code} = product) do
+    Map.put(products, code, product)
+  end
+
   @doc """
   Fetches the product by the product code
 
   ## Arguments
+  * `products` - Products created with `empty/1` and `add/2`
   * `code` - Product code
 
   ## Returns
@@ -12,9 +27,7 @@ defmodule Supermarket.Products do
   * `:error` - when unknown product code
 
   """
-  def fetch(code) do
-    Application.fetch_env!(:supermarket, __MODULE__)
-    |> Keyword.fetch!(:products)
-    |> Map.fetch(code)
+  def fetch(%{} = products, product_code) do
+    Map.fetch(products, product_code)
   end
 end

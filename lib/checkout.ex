@@ -10,6 +10,7 @@ defmodule Supermarket.Checkout do
   ## Arguments
 
   * `product_codes` - List of product codes
+  * `products` - Products created using the `Products` module
 
   ## Returns
 
@@ -20,12 +21,12 @@ defmodule Supermarket.Checkout do
   """
   # GBP should probably not be hardcoded in a real system, but would require an extra paramter to be passed
   # for a multi-currency system, or fetching from a config param for a single currency system.
-  def cashier([]), do: {:ok, Money.zero(:GBP)}
+  def cashier([], _products), do: {:ok, Money.zero(:GBP)}
 
-  def cashier(product_codes) when is_list(product_codes) do
+  def cashier(product_codes, products) when is_list(product_codes) do
     product_code_frequencies = Enum.frequencies(product_codes)
 
-    with {:ok, product_frequencies} <- fetch_products(product_code_frequencies) do
+    with {:ok, product_frequencies} <- fetch_products(product_code_frequencies, products) do
       product_frequencies
       |> Enum.map(fn {%Product{} = product, frequency} ->
         product_total_price(product, frequency)
@@ -34,23 +35,23 @@ defmodule Supermarket.Checkout do
     end
   end
 
-  defp fetch_products(%{} = product_code_frequencies),
-    do: fetch_products(Enum.to_list(product_code_frequencies), [], [])
+  defp fetch_products(%{} = product_code_frequencies, products),
+    do: fetch_products(Enum.to_list(product_code_frequencies), products, [], [])
 
-  defp fetch_products([], found, []),
+  defp fetch_products([], _products, found, []),
     do: {:ok, found}
 
   # Accumulate the found and not_found products tail-recursively
-  defp fetch_products([], _found, not_found),
+  defp fetch_products([], _products, _found, not_found),
     do: {:error, {:unknown_product_codes, Enum.sort(not_found)}}
 
-  defp fetch_products([{code, frequency} | rest], found, not_found) do
-    case Products.fetch(code) do
+  defp fetch_products([{code, frequency} | rest], products, found, not_found) do
+    case Products.fetch(products, code) do
       {:ok, %Product{} = product} ->
-        fetch_products(rest, [{product, frequency} | found], not_found)
+        fetch_products(rest, products, [{product, frequency} | found], not_found)
 
       :error ->
-        fetch_products(rest, found, [code | not_found])
+        fetch_products(rest, products, found, [code | not_found])
     end
   end
 
