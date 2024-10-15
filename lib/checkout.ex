@@ -1,5 +1,6 @@
 defmodule Supermarket.Checkout do
   @moduledoc "Implements the checkout functionality of the supermarket"
+  alias Supermarket.PriceCondition
   alias Supermarket.Product
 
   @doc """
@@ -52,7 +53,10 @@ defmodule Supermarket.Checkout do
     end
   end
 
-  defp product_total_price(%Product{base_price: %Money{} = base_price}, frequency) do
-    Money.mult!(base_price, frequency)
+  defp product_total_price(
+         %Product{base_price: %Money{} = base_price, price_condition: price_condition},
+         frequency
+       ) do
+    PriceCondition.total_price(price_condition, base_price, frequency)
   end
 end

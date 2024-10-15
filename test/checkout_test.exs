@@ -16,6 +16,9 @@ defmodule Supermarket.CheckoutTest do
     end
 
     test "Basket 4" do
+      # The result of this depends on if you calculate the discounted coffee price of 2/3rds
+      # before or after summing the coffees.  This test assumes it is done after summing
+      # If you discount (and round) the price before summing the total would be 30.58
       assert Checkout.cashier(~w(GR1 CF1 SR1 CF1 CF1)) == {:ok, Money.new(:GBP, "30.57")}
     end
   end
