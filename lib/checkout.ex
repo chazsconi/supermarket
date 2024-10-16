@@ -15,50 +15,57 @@ defmodule Supermarket.Checkout do
   ## Returns
 
   * `{:ok, total} - total price as a `Money` struct
-  * `{:error, {:unknown_product_codes, product_codes}} - error if total cannot be calculated due to unknown product code.
-    The list of unknown codes is returned in alphabetical order.
+  * `{:error, {:unknown_product_codes, product_codes}} - error if total cannot be calculated due to
+    one or more unknown product codes. The list of unknown codes is returned in alphabetical order.
 
   """
-  # GBP should probably not be hardcoded in a real system, but would require an extra paramter to be passed
+
+  # GBP should probably not be hardcoded in a real system, but would require an extra parameter to be passed
   # for a multi-currency system, or fetching from a config param for a single currency system.
   def cashier([], _products), do: {:ok, Money.zero(:GBP)}
 
   def cashier(product_codes, products) when is_list(product_codes) do
-    product_code_frequencies = Enum.frequencies(product_codes)
+    product_code_counts = Enum.frequencies(product_codes)
 
-    with {:ok, product_frequencies} <- fetch_products(product_code_frequencies, products) do
-      product_frequencies
-      |> Enum.map(fn {%Product{} = product, frequency} ->
-        product_total_price(product, frequency)
-      end)
+    with {:ok, product_counts} <- fetch_products(product_code_counts, products) do
+      product_counts
+      |> product_total_prices()
       |> Money.sum(%{})
     end
   end
 
-  defp fetch_products(%{} = product_code_frequencies, products),
-    do: fetch_products(Enum.to_list(product_code_frequencies), products, [], [])
+  # Accumulate the product_count tuples and unknown product codes tail-recursively
+  # We do this after fetching the counts so there is only one pass and if there are duplicate product codes
+  # the list will be shorter
+  defp fetch_products(%{} = product_code_counts, products),
+    do: fetch_products(Enum.to_list(product_code_counts), products, [], [])
 
-  defp fetch_products([], _products, found, []),
-    do: {:ok, found}
+  defp fetch_products([], _products, product_counts_acc, []),
+    do: {:ok, product_counts_acc}
 
-  # Accumulate the found and not_found products tail-recursively
-  defp fetch_products([], _products, _found, not_found),
-    do: {:error, {:unknown_product_codes, Enum.sort(not_found)}}
+  defp fetch_products([], _products, _found, unknown_codes_acc),
+    do: {:error, {:unknown_product_codes, Enum.sort(unknown_codes_acc)}}
 
-  defp fetch_products([{code, frequency} | rest], products, found, not_found) do
+  defp fetch_products([{code, count} | rest], products, product_counts_acc, unknown_codes_acc) do
     case Products.fetch(products, code) do
       {:ok, %Product{} = product} ->
-        fetch_products(rest, products, [{product, frequency} | found], not_found)
+        fetch_products(
+          rest,
+          products,
+          [{product, count} | product_counts_acc],
+          unknown_codes_acc
+        )
 
       :error ->
-        fetch_products(rest, products, found, [code | not_found])
+        fetch_products(rest, products, product_counts_acc, [code | unknown_codes_acc])
     end
   end
 
-  defp product_total_price(
-         %Product{base_price: %Money{} = base_price, price_condition: price_condition},
-         frequency
-       ) do
-    PriceCondition.total_price(price_condition, base_price, frequency)
+  defp product_total_prices(product_counts) do
+    product_counts
+    |> Enum.map(fn {%Product{base_price: %Money{} = base_price, price_condition: price_condition},
+                    count} ->
+      PriceCondition.total_price(price_condition, base_price, count)
+    end)
   end
 end
