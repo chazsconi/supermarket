@@ -1,5 +1,8 @@
 defmodule Supermarket.PriceCondition.BulkDiscountFraction do
-  @moduledoc "Buy one get one free price condition"
+  @moduledoc """
+  Price condition where the price of all items is discounted by a fraction if the
+  minimum quantity of items is exceeded
+  """
 
   @enforce_keys [:min_quantity, :discount_fraction]
   defstruct [

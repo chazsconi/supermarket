@@ -1,5 +1,8 @@
 defmodule Supermarket.PriceCondition.BulkDiscountPrice do
-  @moduledoc "Buy one get one free price condition"
+  @moduledoc """
+  Price condition where the price of all items has a different (normally lower) price if
+  minimum quantity of items is met.
+  """
 
   @enforce_keys [:min_quantity, :discount_price]
   defstruct [

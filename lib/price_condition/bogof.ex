@@ -1,5 +1,5 @@
 defmodule Supermarket.PriceCondition.Bogof do
-  @moduledoc "Buy one get one free price condition"
+  @moduledoc "Buy-one-get-one-free price condition"
 
   # Nothing needed in the struct
   defstruct []

@@ -9,6 +9,14 @@ defmodule Supermarket.Products do
 
   @doc """
   Add a product to the products
+
+  ## Arguments
+  * `products` - Products created with `empty/1` or a subsequent `add/1`
+  * `product` - A `Product` struct to add
+
+  ## Returns
+  * `products` with the `product` added.
+
   """
   def add(products, %Product{code: code} = product) do
     Map.put(products, code, product)

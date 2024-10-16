@@ -4,6 +4,7 @@ defmodule Supermarket.ProductsTest do
   alias Supermarket.Products.Product
 
   describe "fetch/2" do
+    # This also will test `empty/0` and `add/2`
     setup do
       products =
         Products.empty()
@@ -15,6 +16,10 @@ defmodule Supermarket.ProductsTest do
 
     test "known product code returns product", %{products: products} do
       assert {:ok, %Product{code: "BA1"}} = Products.fetch(products, "BA1")
+    end
+
+    test "known 2nd product code returns product", %{products: products} do
+      assert {:ok, %Product{code: "AP1"}} = Products.fetch(products, "AP1")
     end
 
     test "unknown product code returns error", %{products: products} do
